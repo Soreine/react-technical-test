@@ -10,27 +10,35 @@ interface PokemonProps {
 function PokemonItem({ pokemon, onClick }: PokemonProps) {
   const { data: species } = usePokeApi((api) => api.utility.getResourceByUrl<PokemonSpecies>(pokemon.species.url));
 
-  console.log(species);
+  if (!species) return <PokemonItemPlaceholder />;
+
   return (
     <tr onClick={onClick}>
       <td width="1">
-        {species ? (
-          <img
-            src={pokemon.sprites.other?.["official-artwork"].front_default ?? "src/assets/pokeball.png"}
-            style={{
-              height: "3em",
-            }}
-          />
-        ) : (
-          <img
-            src={"src/assets/pokeball.png"}
-            style={{
-              height: "3em",
-            }}
-          />
-        )}
+        <img
+          src={pokemon.sprites.other?.["official-artwork"].front_default ?? "src/assets/pokeball.png"}
+          style={{
+            height: "3em",
+          }}
+        />
       </td>
-      <td>{species && getLocalizedName(species)}</td>
+      <td>{getLocalizedName(species)}</td>
+    </tr>
+  );
+}
+
+function PokemonItemPlaceholder() {
+  return (
+    <tr>
+      <td width="1">
+        <img
+          src={"src/assets/pokeball.png"}
+          style={{
+            height: "3em",
+          }}
+        />
+      </td>
+      <td></td>
     </tr>
   );
 }
@@ -79,11 +87,9 @@ function PokemonList() {
   const [openedPokemon, openPokemon] = useState<Pokemon>();
   const { data: pokemonList } = usePokeApi((api) => api.pokemon.listPokemons(0, 10).then(resolveResources<Pokemon>));
 
-  if (!pokemonList) return <div>Chargement ...</div>;
-
   return (
     <div>
-      {openedPokemon && <PokedexEntry pokemon={openedPokemon} />}
+      {openedPokemon && <PokedexEntry pokemon={openedPokemon} onClose={() => openPokemon(undefined)} />}
 
       <table
         style={{
@@ -91,9 +97,11 @@ function PokemonList() {
         }}
       >
         <tbody>
-          {pokemonList.results.map((pokemon) => (
-            <PokemonItem key={pokemon.id} pokemon={pokemon} onClick={() => openPokemon(pokemon)} />
-          ))}
+          {pokemonList
+            ? pokemonList.results.map((pokemon) => (
+                <PokemonItem key={pokemon.id} pokemon={pokemon} onClick={() => openPokemon(pokemon)} />
+              ))
+            : Array.from(Array(10).keys()).map((i) => <PokemonItemPlaceholder key={i} />)}
         </tbody>
       </table>
     </div>
