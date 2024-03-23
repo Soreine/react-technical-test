@@ -24,6 +24,14 @@ body {
 
 table {
   margin: 0 auto;
+  border: 1px solid blue;
+  background: white;
+  color: blue;
+  width: 800px;
+}
+
+td {
+  border: 1px solid blue;
 }
 
 .rainbow {
