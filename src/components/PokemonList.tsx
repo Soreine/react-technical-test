@@ -1,4 +1,4 @@
-import { Pokemon, PokemonSpecies } from "pokenode-ts";
+import { Pokemon, PokemonSpecies, Stat, Type } from "pokenode-ts";
 import { useState } from "react";
 import usePokeApi, { getLocalizedName, resolveResources } from "src/hooks/usePokeApi";
 
@@ -46,16 +46,18 @@ function PokemonItemPlaceholder() {
 function PokedexEntry({ pokemon, onClose }: { pokemon: Pokemon; onClose?: () => void }) {
   const { data: species } = usePokeApi((api) => api.utility.getResourceByUrl<PokemonSpecies>(pokemon.species.url));
 
+  const { data: types } = usePokeApi((api) =>
+    Promise.all(pokemon.types.map(({ type }) => api.utility.getResourceByUrl<Type>(type.url)))
+  );
+
+  const { data: stats } = usePokeApi((api) =>
+    Promise.all(pokemon.stats.map(({ stat }) => api.utility.getResourceByUrl<Stat>(stat.url)))
+  );
+
   return (
     <div className="PokedexEntry">
       <button onClick={onClose}>Retour</button>
       <table>
-        <thead>
-          <tr>
-            <th>Image</th>
-            <th>Nom</th>
-          </tr>
-        </thead>
         <tbody>
           <tr>
             <td width="1">
@@ -76,6 +78,47 @@ function PokedexEntry({ pokemon, onClose }: { pokemon: Pokemon; onClose?: () => 
               )}
             </td>
             <td>{species && getLocalizedName(species)}</td>
+          </tr>
+
+          <tr>
+            <td>Taille</td>
+            <td>{pokemon.height / 10} m</td>
+          </tr>
+
+          <tr>
+            <td>Poids</td>
+            <td>{pokemon.weight} kg</td>
+          </tr>
+
+          <tr>
+            <td>Types</td>
+            <td>{types?.map((t) => getLocalizedName(t)).join(", ")}</td>
+          </tr>
+
+          <tr>
+            <td>Stats</td>
+
+            <td>
+              {stats && (
+                <table>
+                  <thead>
+                    <tr>
+                      {stats.map((s) => (
+                        <td key={s.id}>{getLocalizedName(s)}</td>
+                      ))}
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      {pokemon.stats.map((stat) => (
+                        <td key={stat.stat.name}>{stat.base_stat}</td>
+                      ))}
+                    </tr>
+                  </tbody>
+                </table>
+              )}
+            </td>
           </tr>
         </tbody>
       </table>
