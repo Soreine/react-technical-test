@@ -3,23 +3,25 @@ import PokemonList from "./PokemonList";
 function Footer() {
   return (
     <table style={{ marginTop: "2em" }}>
-      <tr>
-        <td>
-          <a href="https://pokenode-ts.vercel.app/">Doc API Pokemon</a>
-        </td>
-        <td>
-          <a href="https://www.xplortechnologies.com/fr/travailler-chez-nous">Xplor Technologies</a>
-        </td>
-      </tr>
-      <tr>
-        <td colSpan={999}>
-          © 1998 Pokémon.{" "}
-          <a href="https://t.ly/uBmFu" rel="copyright">
-            ©
-          </a>{" "}
-          1995–2023 Nintendo/Creatures Inc./GAME FREAK inc. Pokémon
-        </td>
-      </tr>
+      <tbody>
+        <tr>
+          <td>
+            <a href="https://pokenode-ts.vercel.app/">Doc API Pokemon</a>
+          </td>
+          <td>
+            <a href="https://www.xplortechnologies.com/fr/travailler-chez-nous">Xplor Technologies</a>
+          </td>
+        </tr>
+        <tr>
+          <td colSpan={999}>
+            © 1998 Pokémon.{" "}
+            <a href="https://t.ly/uBmFu" rel="copyright">
+              ©
+            </a>{" "}
+            1995–2023 Nintendo/Creatures Inc./GAME FREAK inc. Pokémon
+          </td>
+        </tr>
+      </tbody>
     </table>
   );
 }
