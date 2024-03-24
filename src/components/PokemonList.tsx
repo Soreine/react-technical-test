@@ -59,6 +59,7 @@ function PokedexEntry({ pokemon, onClose }: { pokemon: Pokemon; onClose?: () => 
       <p>
         <button onClick={onClose}>Retour</button>
       </p>
+
       <table>
         <tbody>
           <tr>
@@ -94,7 +95,11 @@ function PokedexEntry({ pokemon, onClose }: { pokemon: Pokemon; onClose?: () => 
 
           <tr>
             <td>Types</td>
-            <td>{types?.map((t) => getLocalizedName(t)).join(", ")}</td>
+            <td>
+              {types?.map((t) => (
+                <span className={"pokeType " + t.name}>{getLocalizedName(t)}</span>
+              ))}
+            </td>
           </tr>
 
           <tr>
