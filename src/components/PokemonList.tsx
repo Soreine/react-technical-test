@@ -56,7 +56,9 @@ function PokedexEntry({ pokemon, onClose }: { pokemon: Pokemon; onClose?: () => 
 
   return (
     <div className="PokedexEntry">
-      <button onClick={onClose}>Retour</button>
+      <p>
+        <button onClick={onClose}>Retour</button>
+      </p>
       <table>
         <tbody>
           <tr>
@@ -136,7 +138,7 @@ function PokemonList() {
 
       <table
         style={{
-          visibility: openedPokemon ? "hidden" : "visible",
+          display: openedPokemon ? "none" : undefined,
         }}
       >
         <tbody>
