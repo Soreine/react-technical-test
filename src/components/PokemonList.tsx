@@ -1,5 +1,5 @@
 import { Pokemon, PokemonSpecies, Stat, Type } from "pokenode-ts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import usePokeApi, { getLocalizedName, resolveResources } from "src/hooks/usePokeApi";
 
 interface PokemonProps {
@@ -130,10 +130,26 @@ function PokedexEntry({ pokemon, onClose }: { pokemon: Pokemon; onClose?: () => 
 
 function PokemonList() {
   const [openedPokemon, openPokemon] = useState<Pokemon>();
+  const [searchInput, setSearchInput] = useState("");
   const { data: pokemonList } = usePokeApi((api) => api.pokemon.listPokemons(0, 10).then(resolveResources<Pokemon>));
+
+  const { data: pokemonSearch } = usePokeApi((api) => api.pokemon.getPokemonByName(searchInput), {
+    queryKey: searchInput,
+  });
+
+  console.log({ pokemonSearch });
 
   return (
     <div>
+      <p>
+        <input
+          placeholder="Search"
+          autoFocus
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+        ></input>
+      </p>
+
       {openedPokemon && <PokedexEntry pokemon={openedPokemon} onClose={() => openPokemon(undefined)} />}
 
       <table
