@@ -2,6 +2,7 @@ import { Pokemon, PokemonSpecies, Stat, Type } from "pokenode-ts";
 import { useState } from "react";
 import usePokeApi, { getLocalizedName, resolveResources } from "src/hooks/usePokeApi";
 import usePokemonNameSearch from "src/hooks/usePokemonNameSearch";
+import { useDebounce } from "use-debounce";
 
 interface PokemonProps {
   pokemon: Pokemon;
@@ -143,15 +144,12 @@ function PokemonList({
   searchInput: string;
   onOpenPokemon: (p: Pokemon | undefined) => void;
 }) {
-  const defaultPokemonList = usePokeApi((api) => api.pokemon.listPokemons(0, 10).then(resolveResources<Pokemon>));
+  const defaultPokemonList = usePokeApi((api) => api.pokemon.listPokemons(0, 5).then(resolveResources<Pokemon>));
 
   const searchedPokemons = usePokemonNameSearch(searchInput);
+  const placeholderList = Array.from(Array(5).keys()).map((i) => <PokemonItemPlaceholder key={i} />);
 
-  const displaySearchResults = Boolean(searchInput);
-
-  const placeholderList = Array.from(Array(10).keys()).map((i) => <PokemonItemPlaceholder key={i} />);
-
-  if (displaySearchResults) {
+  if (searchInput) {
     return (
       <table>
         <tbody>
@@ -163,24 +161,25 @@ function PokemonList({
         </tbody>
       </table>
     );
+  } else {
+    return (
+      <table>
+        <tbody>
+          {!defaultPokemonList.isLoading && !defaultPokemonList.error && defaultPokemonList.data
+            ? defaultPokemonList.data.results.map((pokemon) => (
+                <PokemonItem key={pokemon.id} pokemon={pokemon} onClick={() => onOpenPokemon(pokemon)} />
+              ))
+            : placeholderList}
+        </tbody>
+      </table>
+    );
   }
-
-  return (
-    <table>
-      <tbody>
-        {!defaultPokemonList.isLoading && !defaultPokemonList.error && defaultPokemonList.data
-          ? defaultPokemonList.data.results.map((pokemon) => (
-              <PokemonItem key={pokemon.id} pokemon={pokemon} onClick={() => onOpenPokemon(pokemon)} />
-            ))
-          : placeholderList}
-      </tbody>
-    </table>
-  );
 }
 
 function Pokedex() {
   const [openedPokemon, openPokemon] = useState<Pokemon>();
   const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearchInput] = useDebounce(searchInput, 500);
 
   return (
     <div>
@@ -197,7 +196,7 @@ function Pokedex() {
             ></input>
           </p>
 
-          <PokemonList searchInput={searchInput} onOpenPokemon={openPokemon} />
+          <PokemonList searchInput={debouncedSearchInput} onOpenPokemon={openPokemon} />
         </>
       )}
     </div>

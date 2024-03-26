@@ -35,7 +35,7 @@ const options = {
 const fuse = new Fuse(POKEMON_DATA as Array<PokemonDataEntry>, options);
 
 function usePokemonNameSearch(searchName: string) {
-  const searchResults = fuse.search(searchName, { limit: 10 });
+  const searchResults = fuse.search(searchName, { limit: 5 });
   const idResults = searchResults.map((res) => res.item.id);
 
   const pokemonResults = usePokeApi((api) => Promise.all(idResults.map((id) => api.pokemon.getPokemonById(id))), {
