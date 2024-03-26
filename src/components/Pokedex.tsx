@@ -1,6 +1,7 @@
 import { Pokemon, PokemonSpecies, Stat, Type } from "pokenode-ts";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import usePokeApi, { getLocalizedName, resolveResources } from "src/hooks/usePokeApi";
+import usePokemonNameSearch from "src/hooks/usePokemonNameSearch";
 
 interface PokemonProps {
   pokemon: Pokemon;
@@ -97,7 +98,9 @@ function PokedexEntry({ pokemon, onClose }: { pokemon: Pokemon; onClose?: () => 
             <td>Types</td>
             <td>
               {types?.map((t) => (
+                <span key={t.id} className={"pokeType " + t.name}>
                   {getLocalizedName(t)}
+                </span>
               ))}
             </td>
           </tr>
@@ -133,45 +136,72 @@ function PokedexEntry({ pokemon, onClose }: { pokemon: Pokemon; onClose?: () => 
   );
 }
 
-function PokemonList() {
+function PokemonList({
+  searchInput,
+  onOpenPokemon,
+}: {
+  searchInput: string;
+  onOpenPokemon: (p: Pokemon | undefined) => void;
+}) {
+  const defaultPokemonList = usePokeApi((api) => api.pokemon.listPokemons(0, 10).then(resolveResources<Pokemon>));
+
+  const searchedPokemons = usePokemonNameSearch(searchInput);
+
+  const displaySearchResults = Boolean(searchInput);
+
+  const placeholderList = Array.from(Array(10).keys()).map((i) => <PokemonItemPlaceholder key={i} />);
+
+  if (displaySearchResults) {
+    return (
+      <table>
+        <tbody>
+          {!searchedPokemons.isLoading && !searchedPokemons.error && searchedPokemons.data
+            ? searchedPokemons.data.map((pokemon) => (
+                <PokemonItem key={pokemon.id} pokemon={pokemon} onClick={() => onOpenPokemon(pokemon)} />
+              ))
+            : placeholderList}
+        </tbody>
+      </table>
+    );
+  }
+
+  return (
+    <table>
+      <tbody>
+        {!defaultPokemonList.isLoading && !defaultPokemonList.error && defaultPokemonList.data
+          ? defaultPokemonList.data.results.map((pokemon) => (
+              <PokemonItem key={pokemon.id} pokemon={pokemon} onClick={() => onOpenPokemon(pokemon)} />
+            ))
+          : placeholderList}
+      </tbody>
+    </table>
+  );
+}
+
+function Pokedex() {
   const [openedPokemon, openPokemon] = useState<Pokemon>();
   const [searchInput, setSearchInput] = useState("");
-  const { data: pokemonList } = usePokeApi((api) => api.pokemon.listPokemons(0, 10).then(resolveResources<Pokemon>));
-
-  const { data: pokemonSearch } = usePokeApi((api) => api.pokemon.getPokemonByName(searchInput), {
-    queryKey: searchInput,
-  });
-
-  console.log({ pokemonSearch });
 
   return (
     <div>
-      <p>
-        <input
-          placeholder="Search"
-          autoFocus
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-        ></input>
-      </p>
+      {openedPokemon ? (
+        <PokedexEntry pokemon={openedPokemon} onClose={() => openPokemon(undefined)} />
+      ) : (
+        <>
+          <p>
+            <input
+              placeholder="Search"
+              autoFocus
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            ></input>
+          </p>
 
-      {openedPokemon && <PokedexEntry pokemon={openedPokemon} onClose={() => openPokemon(undefined)} />}
-
-      <table
-        style={{
-          display: openedPokemon ? "none" : undefined,
-        }}
-      >
-        <tbody>
-          {pokemonList
-            ? pokemonList.results.map((pokemon) => (
-                <PokemonItem key={pokemon.id} pokemon={pokemon} onClick={() => openPokemon(pokemon)} />
-              ))
-            : Array.from(Array(10).keys()).map((i) => <PokemonItemPlaceholder key={i} />)}
-        </tbody>
-      </table>
+          <PokemonList searchInput={searchInput} onOpenPokemon={openPokemon} />
+        </>
+      )}
     </div>
   );
 }
 
-export default PokemonList;
+export default Pokedex;
