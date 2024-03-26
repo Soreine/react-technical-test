@@ -97,7 +97,7 @@ function PokedexEntry({ pokemon, onClose }: { pokemon: Pokemon; onClose?: () => 
             <td>Types</td>
             <td>
               {types?.map((t) => (
-                <span className={"pokeType " + t.name}>{getLocalizedName(t)}</span>
+                  {getLocalizedName(t)}
               ))}
             </td>
           </tr>
