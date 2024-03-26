@@ -1,21 +1,33 @@
 import { Pokemon, PokemonSpecies, Stat, Type } from "pokenode-ts";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import usePokeApi, { getLocalizedName, resolveResources } from "src/hooks/usePokeApi";
 import usePokemonNameSearch from "src/hooks/usePokemonNameSearch";
 import { useDebounce } from "use-debounce";
 
-interface PokemonProps {
+function PokemonItem({
+  pokemon,
+  onClick,
+  onRemove,
+  onAdd,
+  inTeam,
+}: {
   pokemon: Pokemon;
   onClick?: () => void;
-}
-
-function PokemonItem({ pokemon, onClick }: PokemonProps) {
+  onRemove?: () => void;
+  onAdd?: () => void;
+  inTeam?: boolean;
+}) {
   const { data: species } = usePokeApi((api) => api.utility.getResourceByUrl<PokemonSpecies>(pokemon.species.url));
 
   if (!species) return <PokemonItemPlaceholder />;
 
   return (
-    <tr onClick={onClick}>
+    <tr
+      onClick={onClick}
+      style={{
+        cursor: onClick ? "pointer" : "default",
+      }}
+    >
       <td width="1">
         <img
           src={pokemon.sprites.other?.["official-artwork"].front_default ?? "src/assets/pokeball.png"}
@@ -24,7 +36,38 @@ function PokemonItem({ pokemon, onClick }: PokemonProps) {
           }}
         />
       </td>
+
       <td>{getLocalizedName(species)}</td>
+
+      {onRemove && (
+        <td>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+          >
+            🗑
+          </button>
+        </td>
+      )}
+
+      {onAdd && (
+        <td>
+          {inTeam ? (
+            <span>In team ✅</span>
+          ) : (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAdd();
+              }}
+            >
+              Add ➕
+            </button>
+          )}
+        </td>
+      )}
     </tr>
   );
 }
@@ -45,7 +88,17 @@ function PokemonItemPlaceholder() {
   );
 }
 
-function PokedexEntry({ pokemon, onClose }: { pokemon: Pokemon; onClose?: () => void }) {
+function PokedexEntry({
+  pokemon,
+  onClose,
+  inTeam,
+  addToTeam,
+}: {
+  pokemon: Pokemon;
+  onClose?: () => void;
+  inTeam: boolean;
+  addToTeam: (id: number) => void;
+}) {
   const { data: species } = usePokeApi((api) => api.utility.getResourceByUrl<PokemonSpecies>(pokemon.species.url));
 
   const { data: types } = usePokeApi((api) =>
@@ -83,6 +136,9 @@ function PokedexEntry({ pokemon, onClose }: { pokemon: Pokemon; onClose?: () => 
               )}
             </td>
             <td>{species && getLocalizedName(species)}</td>
+            <td>
+              <button onClick={() => addToTeam(pokemon.id)}>Add ➕</button>
+            </td>
           </tr>
 
           <tr>
@@ -140,9 +196,13 @@ function PokedexEntry({ pokemon, onClose }: { pokemon: Pokemon; onClose?: () => 
 function PokemonList({
   searchInput,
   onOpenPokemon,
+  team,
+  addToTeam,
 }: {
   searchInput: string;
   onOpenPokemon: (p: Pokemon | undefined) => void;
+  team: number[];
+  addToTeam: (id: number) => void;
 }) {
   const defaultPokemonList = usePokeApi((api) => api.pokemon.listPokemons(0, 5).then(resolveResources<Pokemon>));
 
@@ -151,11 +211,17 @@ function PokemonList({
 
   if (searchInput) {
     return (
-      <table>
+      <table className="PokemonList">
         <tbody>
           {!searchedPokemons.isLoading && !searchedPokemons.error && searchedPokemons.data
             ? searchedPokemons.data.map((pokemon) => (
-                <PokemonItem key={pokemon.id} pokemon={pokemon} onClick={() => onOpenPokemon(pokemon)} />
+                <PokemonItem
+                  key={pokemon.id}
+                  pokemon={pokemon}
+                  onClick={() => onOpenPokemon(pokemon)}
+                  inTeam={team.includes(pokemon.id)}
+                  onAdd={() => addToTeam(pokemon.id)}
+                />
               ))
             : placeholderList}
         </tbody>
@@ -163,11 +229,17 @@ function PokemonList({
     );
   } else {
     return (
-      <table>
+      <table className="PokemonList">
         <tbody>
           {!defaultPokemonList.isLoading && !defaultPokemonList.error && defaultPokemonList.data
             ? defaultPokemonList.data.results.map((pokemon) => (
-                <PokemonItem key={pokemon.id} pokemon={pokemon} onClick={() => onOpenPokemon(pokemon)} />
+                <PokemonItem
+                  key={pokemon.id}
+                  pokemon={pokemon}
+                  onClick={() => onOpenPokemon(pokemon)}
+                  inTeam={team.includes(pokemon.id)}
+                  onAdd={() => addToTeam(pokemon.id)}
+                />
               ))
             : placeholderList}
         </tbody>
@@ -176,30 +248,95 @@ function PokemonList({
   }
 }
 
+function usePokemonTeam() {
+  const MAX_SIZE = 6;
+  const [team, setTeam] = useState<number[]>([]);
+
+  const addToTeam = useCallback(
+    (id: number) => {
+      if (team.includes(id)) return;
+
+      setTeam([...team, id].slice(0, MAX_SIZE));
+    },
+    [setTeam, team]
+  );
+
+  const removeFromTeam = useCallback(
+    (id: number) => {
+      setTeam(team.filter((_id) => _id !== id));
+    },
+    [setTeam, team]
+  );
+
+  return {
+    team,
+    addToTeam,
+    removeFromTeam,
+  };
+}
+
+function PokemonTeam({ team, removeFromTeam }: { team: number[]; removeFromTeam: (id: number) => void }) {
+  const pokemonTeam = usePokeApi((api) => Promise.all(team.map((id) => api.pokemon.getPokemonById(id))), {
+    queryKey: ["team", ...team],
+  });
+
+  return (
+    <table className="PokemonTeam">
+      <tbody>
+        {!pokemonTeam.isLoading && pokemonTeam.data
+          ? pokemonTeam.data.map((pokemon) => (
+              <PokemonItem key={pokemon.id} pokemon={pokemon} onRemove={() => removeFromTeam(pokemon.id)} />
+            ))
+          : null}
+      </tbody>
+    </table>
+  );
+}
+
 function Pokedex() {
   const [openedPokemon, openPokemon] = useState<Pokemon>();
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearchInput] = useDebounce(searchInput, 500);
+  const { team, addToTeam, removeFromTeam } = usePokemonTeam();
+
+  console.log(team);
 
   return (
-    <div>
-      {openedPokemon ? (
-        <PokedexEntry pokemon={openedPokemon} onClose={() => openPokemon(undefined)} />
-      ) : (
-        <>
-          <p>
-            <input
-              placeholder="Search"
-              autoFocus
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-            ></input>
-          </p>
+    <>
+      <p>
+        <input
+          placeholder="Search"
+          autoFocus
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+        ></input>
+      </p>
 
-          <PokemonList searchInput={debouncedSearchInput} onOpenPokemon={openPokemon} />
-        </>
-      )}
-    </div>
+      <div className="PokedexContainer">
+        <div className="Pokedex">
+          {openedPokemon ? (
+            <PokedexEntry
+              pokemon={openedPokemon}
+              onClose={() => openPokemon(undefined)}
+              inTeam={team.includes(openedPokemon.id)}
+              addToTeam={addToTeam}
+            />
+          ) : (
+            <>
+              <PokemonList
+                searchInput={debouncedSearchInput}
+                onOpenPokemon={openPokemon}
+                team={team}
+                addToTeam={addToTeam}
+              />
+            </>
+          )}
+        </div>
+        <div className="PokeTeam">
+          <PokemonTeam team={team} removeFromTeam={removeFromTeam} />
+        </div>
+      </div>
+    </>
   );
 }
 

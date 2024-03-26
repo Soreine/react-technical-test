@@ -27,7 +27,6 @@ table {
   border: 1px solid blue;
   background: white;
   color: blue;
-  width: 800px;
 }
 
 td {
@@ -47,6 +46,24 @@ td {
   margin-left: 5px;
   font-weight: bold;
 }
+
+.PokedexContainer {
+  display: flex;
+  flex-direction: row;
+}
+
+.PokemonList {
+  min-width: 500px;
+}
+
+.PokemonTeam {
+  min-width: 300px;
+}
+
+.PokedexEntry table {
+  min-width: 500px;
+}
+
 .normal {
   background-color: #a8a878;
 }
