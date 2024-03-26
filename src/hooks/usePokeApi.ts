@@ -7,8 +7,10 @@ const api = new MainClient();
 /**
  * @link https://pokenode-ts.vercel.app/
  */
-const usePokeApi = <T>(fetcher: (api: MainClient) => Promise<T>, options?: UseBaseQueryOptions) =>
-  useQuery<T>(useId(), () => fetcher(api), options as any);
+const usePokeApi = <T>(fetcher: (api: MainClient) => Promise<T>, options?: UseBaseQueryOptions) => {
+  const id = useId();
+  return useQuery<T>(options?.queryKey || id, () => fetcher(api), options as any);
+};
 
 export default usePokeApi;
 
