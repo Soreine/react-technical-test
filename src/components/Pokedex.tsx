@@ -55,7 +55,7 @@ function PokemonItem({
       {onAdd && (
         <td>
           {inTeam ? (
-            <span>In team ✅</span>
+            <span>☑️</span>
           ) : (
             <button
               onClick={(e) => {
@@ -63,7 +63,7 @@ function PokemonItem({
                 onAdd();
               }}
             >
-              Add ➕
+              Ajouter ➕
             </button>
           )}
         </td>
@@ -305,7 +305,7 @@ function Pokedex() {
     <>
       <p>
         <input
-          placeholder="Search"
+          placeholder="Rechercher"
           autoFocus
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
