@@ -15,3 +15,8 @@ Mercredi 10h57 :
 1h finished team list. Starting to refactor to extract type data etc.
 
 Mercredi 15h36 :
+1h10 finished types summary.
+
+TOTAL =
+Essential: 4h
+Optional : 3h
