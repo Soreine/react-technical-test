@@ -15,10 +15,10 @@ export function PokemonList({
   team: number[];
   addToTeam: (id: number) => void;
 }) {
-  const defaultPokemonList = usePokeApi((api) => api.pokemon.listPokemons(0, 5).then(resolveResources<Pokemon>));
+  const defaultPokemonList = usePokeApi((api) => api.pokemon.listPokemons(0, 7).then(resolveResources<Pokemon>));
 
   const searchedPokemons = usePokemonNameSearch(searchInput);
-  const placeholderList = Array.from(Array(5).keys()).map((i) => <PokemonItemPlaceholder key={i} />);
+  const placeholderList = Array.from(Array(7).keys()).map((i) => <PokemonItemPlaceholder key={i} />);
 
   if (searchInput) {
     return (

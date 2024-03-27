@@ -49,8 +49,9 @@ td {
 
 .PokedexContainer {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
   margin: auto;
   width: 80vw;
   max-width: 1200px;
@@ -59,7 +60,9 @@ td {
 }
 
 .Pokedex {
-  flex-grow: 2;
+  flex-grow: 1;
+  width: 100%;
+  max-width: 800px;
 }
 
 .PokemonTeam {
@@ -72,6 +75,28 @@ td {
 
 .PokedexEntry table {
   min-width: 500px;
+}
+
+.TeamMembers {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.Member {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.MemberPicture {
+  height: 5em;
+}
+
+.TypeSummary {
+  margin-top: 30px;
+  width: 100%;
 }
 
 .normal {

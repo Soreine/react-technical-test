@@ -45,7 +45,7 @@ export function PokemonItem({
               onRemove();
             }}
           >
-            🗑
+            ❌
           </button>
         </td>
       )}

@@ -29,8 +29,8 @@ function Footer() {
 function App() {
   return (
     <>
-      <img src="src/assets/logo.png" width="800" />
-      <h1 className="rainbow">Bienvenue sur le site des amis des pokemons</h1>
+      <img src="src/assets/logo.png" width="400" />
+      <h2 className="rainbow">Bienvenue sur le site des amis des pokemons</h2>
       <h5 className="blink">⭐ Yay ! ⭐</h5>
       <Pokedex />
       <br />

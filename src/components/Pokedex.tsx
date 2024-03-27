@@ -15,16 +15,18 @@ function Pokedex() {
 
   return (
     <>
-      <p>
-        <input
-          placeholder="Rechercher"
-          autoFocus
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-        ></input>
-      </p>
-
       <div className="PokedexContainer">
+        <PokemonTeam team={team} removeFromTeam={removeFromTeam} />
+
+        <p>
+          <input
+            placeholder="Rechercher"
+            autoFocus
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          ></input>
+        </p>
+
         <div className="Pokedex">
           {openedPokemon ? (
             <PokedexEntry pokemon={openedPokemon} onClose={() => openPokemon(undefined)} />
@@ -39,8 +41,6 @@ function Pokedex() {
             </>
           )}
         </div>
-
-        <PokemonTeam team={team} removeFromTeam={removeFromTeam} />
       </div>
     </>
   );

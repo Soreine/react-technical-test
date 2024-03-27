@@ -1,6 +1,6 @@
 import { Pokemon, PokemonSpecies, Stat, Type } from "pokenode-ts";
 import { useCallback, useState } from "react";
-import usePokeApi from "src/hooks/usePokeApi";
+import usePokeApi, { getLocalizedName, resolveResources } from "src/hooks/usePokeApi";
 import { PokemonItemPlaceholder } from "./PokemonItemPlaceholder";
 import { PokemonItem } from "./PokemonItem";
 
@@ -60,23 +60,114 @@ export function PokemonTeam({ team, removeFromTeam }: { team: number[]; removeFr
     );
   });
 
+  const teamTypes: Type[] = teamData.reduce((_teamTypes: Type[], member) => {
+    if (member.isLoading || !member.data) {
+      return _teamTypes;
+    }
+
+    const newUniqueTypes = member.data.types.filter((type) => !_teamTypes.map((t) => t.id).includes(type.id));
+
+    return [..._teamTypes, ...newUniqueTypes];
+  }, []);
+
   return (
-    <table className="PokemonTeam">
-      <thead>
-        <tr>
-          <th colSpan={3}>Mon équipe</th>
-        </tr>
-      </thead>
-      <tbody>
+    <div className="PokemonTeam">
+      <h3>Mon équipe</h3>
+
+      <div className="TeamMembers">
         {teamData.map((member) => {
           if (!member.isLoading && member.data) {
-            const id = member.data.pokemon.id;
-            return <PokemonItem key={id} pokemon={member.data.pokemon} onRemove={() => removeFromTeam(id)} />;
+            const { pokemon, types } = member.data;
+            return (
+              <div className="Member">
+                <img
+                  className="MemberPicture"
+                  src={pokemon.sprites.other?.["official-artwork"].front_default ?? "src/assets/pokeball.png"}
+                />
+                <div className="MemberTypes">
+                  {types?.map((t) => (
+                    <span key={t.id} className={"pokeType " + t.name}>
+                      {getLocalizedName(t)}
+                    </span>
+                  ))}
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFromTeam(pokemon.id);
+                  }}
+                >
+                  ❌
+                </button>
+              </div>
+            );
           } else {
-            return <PokemonItemPlaceholder />;
+            return (
+              <div className="Member">
+                <img className="MemberPicture" src={"src/assets/pokeball.png"} />;
+              </div>
+            );
           }
         })}
+      </div>
+
+      <TypeSummary types={teamTypes} />
+    </div>
+  );
+}
+
+function TypeSummary({ types }: { types: Type[] }) {
+  const allTypesQuery = usePokeApi((api) => api.pokemon.listTypes().then(resolveResources<Type>));
+
+  if (types.length == 0 || allTypesQuery.isLoading || !allTypesQuery.data) {
+    return null;
+  }
+
+  const allTypes = allTypesQuery.data.results;
+
+  return (
+    <table className="TypeSummary">
+      <tbody>
+        <tr>
+          <td colSpan={1}>Type</td>
+          <td colSpan={1}>Fort</td>
+          <td colSpan={1}>Faible</td>
+        </tr>
+        {types.map((type) => (
+          <tr key={type.id}>
+            <td className={"pokeType " + type.name}>{getLocalizedName(type)}</td>
+            <td>
+              <table style={{ width: "100%" }}>
+                <tbody>
+                  {type.damage_relations.double_damage_to
+                    .map((otherType) => allTypes.find((t) => t.name === otherType.name))
+                    .map(
+                      (otherType) =>
+                        otherType && <tr className={"pokeType " + otherType.name}>{getLocalizedName(otherType)}</tr>
+                    )}
+                </tbody>
+              </table>
+            </td>
+
+            <td>
+              <table style={{ width: "100%" }}>
+                <tbody>
+                  {type.damage_relations.double_damage_from
+                    .map((otherType) => allTypes.find((t) => t.name === otherType.name))
+                    .map(
+                      (otherType) =>
+                        otherType && <tr className={"pokeType " + otherType.name}>{getLocalizedName(otherType)}</tr>
+                    )}
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        ))}
       </tbody>
     </table>
   );
+}
+
+function onlyUnique<T>(value: T, index: number, array: Array<T>): boolean {
+  return array.indexOf(value) === index;
 }
