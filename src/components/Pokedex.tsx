@@ -40,7 +40,7 @@ function PokemonItem({
       <td>{getLocalizedName(species)}</td>
 
       {onRemove && (
-        <td>
+        <td style={{ width: 80 }}>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -53,7 +53,7 @@ function PokemonItem({
       )}
 
       {onAdd && (
-        <td>
+        <td style={{ width: 80 }}>
           {inTeam ? (
             <span>☑️</span>
           ) : (

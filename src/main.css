@@ -50,6 +50,10 @@ td {
 .PokedexContainer {
   display: flex;
   flex-direction: row;
+  margin: auto;
+  min-width: 800px;
+  max-width: 80vw;
+  gap: 30px;
 }
 
 .PokemonList {
