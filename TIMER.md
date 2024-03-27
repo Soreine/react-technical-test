@@ -10,3 +10,8 @@ Create searchable list from french pokemon names. Display them as a list. Still 
 
 1h00
 Start creating a team list.
+
+Mercredi 10h57 :
+1h finished team list. Starting to refactor to extract type data etc.
+
+Mercredi 15h36 :
