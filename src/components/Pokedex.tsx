@@ -4,6 +4,8 @@ import usePokeApi, { getLocalizedName, resolveResources } from "src/hooks/usePok
 import usePokemonNameSearch from "src/hooks/usePokemonNameSearch";
 import { useDebounce } from "use-debounce";
 
+const MAX_TEAM_SIZE = 6;
+
 function PokemonItem({
   pokemon,
   onClick,
@@ -249,14 +251,13 @@ function PokemonList({
 }
 
 function usePokemonTeam() {
-  const MAX_SIZE = 6;
   const [team, setTeam] = useState<number[]>([]);
 
   const addToTeam = useCallback(
     (id: number) => {
       if (team.includes(id)) return;
 
-      setTeam([...team, id].slice(0, MAX_SIZE));
+      setTeam([...team, id].slice(0, MAX_TEAM_SIZE));
     },
     [setTeam, team]
   );
@@ -276,18 +277,36 @@ function usePokemonTeam() {
 }
 
 function PokemonTeam({ team, removeFromTeam }: { team: number[]; removeFromTeam: (id: number) => void }) {
-  const pokemonTeam = usePokeApi((api) => Promise.all(team.map((id) => api.pokemon.getPokemonById(id))), {
-    queryKey: ["team", ...team],
+  const pokemonTeam = Array.from(Array(MAX_TEAM_SIZE).keys()).map((i) => {
+    const id = team[i];
+
+    // To avoid reloading of the entire list every time one pokemon changes,
+    // and because we know we have a fixed number of pokemon,
+    // we make one usePokeApi call per pokemon in the team.
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return usePokeApi<Pokemon | null>(
+      (api) => {
+        if (id !== undefined) {
+          return api.pokemon.getPokemonById(id);
+        } else {
+          return Promise.resolve(null);
+        }
+      },
+      { queryKey: ["team", id] }
+    );
   });
 
   return (
     <table className="PokemonTeam">
       <tbody>
-        {!pokemonTeam.isLoading && pokemonTeam.data
-          ? pokemonTeam.data.map((pokemon) => (
-              <PokemonItem key={pokemon.id} pokemon={pokemon} onRemove={() => removeFromTeam(pokemon.id)} />
-            ))
-          : null}
+        {pokemonTeam.map((pokemon) => {
+          if (!pokemon.isLoading && pokemon.data) {
+            const id = pokemon.data.id;
+            return <PokemonItem key={id} pokemon={pokemon.data} onRemove={() => removeFromTeam(id)} />;
+          } else {
+            return <PokemonItemPlaceholder />;
+          }
+        })}
       </tbody>
     </table>
   );
@@ -332,9 +351,8 @@ function Pokedex() {
             </>
           )}
         </div>
-        <div className="PokeTeam">
-          <PokemonTeam team={team} removeFromTeam={removeFromTeam} />
-        </div>
+
+        <PokemonTeam team={team} removeFromTeam={removeFromTeam} />
       </div>
     </>
   );
