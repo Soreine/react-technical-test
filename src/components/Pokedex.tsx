@@ -85,22 +85,12 @@ function PokemonItemPlaceholder() {
           }}
         />
       </td>
-      <td></td>
+      <td colSpan={2}></td>
     </tr>
   );
 }
 
-function PokedexEntry({
-  pokemon,
-  onClose,
-  inTeam,
-  addToTeam,
-}: {
-  pokemon: Pokemon;
-  onClose?: () => void;
-  inTeam: boolean;
-  addToTeam: (id: number) => void;
-}) {
+function PokedexEntry({ pokemon, onClose }: { pokemon: Pokemon; onClose?: () => void }) {
   const { data: species } = usePokeApi((api) => api.utility.getResourceByUrl<PokemonSpecies>(pokemon.species.url));
 
   const { data: types } = usePokeApi((api) =>
@@ -138,9 +128,6 @@ function PokedexEntry({
               )}
             </td>
             <td>{species && getLocalizedName(species)}</td>
-            <td>
-              <button onClick={() => addToTeam(pokemon.id)}>Add ➕</button>
-            </td>
           </tr>
 
           <tr>
@@ -170,15 +157,12 @@ function PokedexEntry({
             <td>
               {stats && (
                 <table>
-                  <thead>
+                  <tbody>
                     <tr>
                       {stats.map((s) => (
                         <td key={s.id}>{getLocalizedName(s)}</td>
                       ))}
                     </tr>
-                  </thead>
-
-                  <tbody>
                     <tr>
                       {pokemon.stats.map((stat) => (
                         <td key={stat.stat.name}>{stat.base_stat}</td>
@@ -214,6 +198,11 @@ function PokemonList({
   if (searchInput) {
     return (
       <table className="PokemonList">
+        <thead>
+          <tr>
+            <th colSpan={3}>Pokédex</th>
+          </tr>
+        </thead>
         <tbody>
           {!searchedPokemons.isLoading && !searchedPokemons.error && searchedPokemons.data
             ? searchedPokemons.data.map((pokemon) => (
@@ -298,6 +287,11 @@ function PokemonTeam({ team, removeFromTeam }: { team: number[]; removeFromTeam:
 
   return (
     <table className="PokemonTeam">
+      <thead>
+        <tr>
+          <th colSpan={3}>Mon équipe</th>
+        </tr>
+      </thead>
       <tbody>
         {pokemonTeam.map((pokemon) => {
           if (!pokemon.isLoading && pokemon.data) {
@@ -334,12 +328,7 @@ function Pokedex() {
       <div className="PokedexContainer">
         <div className="Pokedex">
           {openedPokemon ? (
-            <PokedexEntry
-              pokemon={openedPokemon}
-              onClose={() => openPokemon(undefined)}
-              inTeam={team.includes(openedPokemon.id)}
-              addToTeam={addToTeam}
-            />
+            <PokedexEntry pokemon={openedPokemon} onClose={() => openPokemon(undefined)} />
           ) : (
             <>
               <PokemonList
