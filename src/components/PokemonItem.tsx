@@ -30,7 +30,7 @@ export function PokemonItem({
         <img
           src={pokemon.sprites.other?.["official-artwork"].front_default ?? "src/assets/pokeball.png"}
           style={{
-            height: "3em",
+            height: "5em",
           }}
         />
       </td>

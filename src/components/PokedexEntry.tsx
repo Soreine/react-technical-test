@@ -30,14 +30,14 @@ export function PokedexEntry({ pokemon, onClose }: { pokemon: Pokemon; onClose?:
                 <img
                   src={pokemon.sprites.other?.["official-artwork"].front_default ?? "src/assets/pokeball.png"}
                   style={{
-                    height: "8em",
+                    height: "10em",
                   }}
                 />
               ) : (
                 <img
                   src={"src/assets/pokeball.png"}
                   style={{
-                    height: "8em",
+                    height: "10em",
                   }}
                 />
               )}
@@ -52,7 +52,7 @@ export function PokedexEntry({ pokemon, onClose }: { pokemon: Pokemon; onClose?:
 
           <tr>
             <td>Poids</td>
-            <td>{pokemon.weight} kg</td>
+            <td>{pokemon.weight / 10} kg</td>
           </tr>
 
           <tr>

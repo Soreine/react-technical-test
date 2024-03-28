@@ -130,8 +130,8 @@ function TypeSummary({ types }: { types: Type[] }) {
       <tbody>
         <tr>
           <td colSpan={1}>Type</td>
-          <td colSpan={1}>Fort</td>
-          <td colSpan={1}>Faible</td>
+          <td colSpan={1}>Forces</td>
+          <td colSpan={1}>Faiblesses</td>
         </tr>
         {types.map((type) => (
           <tr key={type.id}>

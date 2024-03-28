@@ -5,7 +5,7 @@ export function PokemonItemPlaceholder() {
         <img
           src={"src/assets/pokeball.png"}
           style={{
-            height: "3em",
+            height: "5em",
           }}
         />
       </td>
