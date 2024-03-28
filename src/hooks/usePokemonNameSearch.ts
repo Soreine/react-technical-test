@@ -1,7 +1,6 @@
 import Fuse from "fuse.js";
-import POKEMON_DATA from "../../data/pokemon.json";
-import usePokeApi, { resolveResources } from "./usePokeApi";
-import { Pokemon } from "pokenode-ts";
+import POKEMON_DATA from "../assets/pokemon.json";
+import usePokeApi from "./usePokeApi";
 
 // Example:
 // const bulbasaur = {

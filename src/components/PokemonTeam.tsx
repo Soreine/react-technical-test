@@ -1,8 +1,6 @@
 import { Pokemon, PokemonSpecies, Stat, Type } from "pokenode-ts";
 import { useCallback, useState } from "react";
 import usePokeApi, { getLocalizedName, resolveResources } from "src/hooks/usePokeApi";
-import { PokemonItemPlaceholder } from "./PokemonItemPlaceholder";
-import { PokemonItem } from "./PokemonItem";
 
 export const MAX_TEAM_SIZE = 6;
 
@@ -166,8 +164,4 @@ function TypeSummary({ types }: { types: Type[] }) {
       </tbody>
     </table>
   );
-}
-
-function onlyUnique<T>(value: T, index: number, array: Array<T>): boolean {
-  return array.indexOf(value) === index;
 }
